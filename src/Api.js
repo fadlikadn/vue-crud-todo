@@ -13,7 +13,7 @@ export default{
     // (R)ead
     getAll: () => instance.get('todos', {
         transformResponse: [function(data) {
-            return data? JSON.parse(data)._embedded.tools : data;
+            return data? JSON.parse(data)._embedded.todos : data;
         }]
     }),
     // (U)pdate

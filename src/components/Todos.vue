@@ -14,7 +14,7 @@
                         v-model="newTodo"
                         @keyup.enter="addTodo">
                 </header>
-                <section class="main" v-show="todos.length" v-cloack>
+                <section class="main" v-show="todos.length" v-cloak>
                     <input class="toggle-all" type="checkbox" v-model="allDone">
                     <ul class="todo-list">
                         <li v-for="todo in filteredTodos"
@@ -58,6 +58,8 @@
 
 <script>
 
+    import api from '../Api';
+
     // visibility filters
     let filters = {
         all: function(todos) {
@@ -95,13 +97,30 @@
         },
 
         mounted() {
-            // inject some startup data
-            this.todos = [
-                {title: 'Drink coffee', completed: false}, 
-                {title: 'Write REST API', completed: false}, 
-            ];
-            // hide the loading message
-            this.loading = false;
+            /**
+             * Static Data
+             */
+            // // inject some startup data
+            // this.todos = [
+            //     {title: 'Drink coffee', completed: false}, 
+            //     {title: 'Write REST API', completed: false}, 
+            // ];
+            // // hide the loading message
+            // this.loading = false;
+
+            /**
+             * Dynamic Data
+             */
+            api.getAll()
+                .then(response => {
+                    this.$log.debug("Data loaded: ", response.data)
+                    this.todos = response.data
+                })
+                .catch(error => {
+                    this.$log.debug(error)
+                    this.error = "Failed to load todos"
+                })
+                .finally(() => this.loading = false)
         },
 
         // computed properties
