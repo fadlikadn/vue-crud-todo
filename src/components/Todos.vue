@@ -165,10 +165,28 @@
                     return
                 }
 
-                this.todos.push({
-                    title: value,
-                    completed: false
-                })
+                /**
+                 * Static method
+                 */
+                // this.todos.push({
+                //     title: value,
+                //     completed: false
+                // })
+
+                /**
+                 * Dynamic method, communicate with API
+                 */
+                api.createNew(value, false).then((response) => {
+                    this.$log.debug("New item created:", response);
+                    this.todos.push({
+                        id: response.data.id,
+                        title: value,
+                        completed: false
+                    })
+                }).catch((error) => {
+                    this.$log.debug(error);
+                    this.error = "Failed to add todo"
+                });
 
                 this.newTodo = ''
             },
@@ -178,11 +196,34 @@
             },
 
             completeTodo(todo) {
-
+                /**
+                 * Dynamic Method
+                 */
+                api.updateForId(todo.id, todo.title, todo.completed).then((response) => {
+                    this.$log.info("Item updated:", response.data);
+                }).catch((error) => {
+                    this.$log.debug(error)
+                    todo.completed = !todo.completed
+                    this.error = "Failed to update todo"
+                });
             },
 
             removeTodo: function(todo) { // notice NOT using "=>" syntax
-                this.todos.splice(this.todos.indexOf(todo), 1)
+                /**
+                 * Static Method
+                 */
+                // this.todos.splice(this.todos.indexOf(todo), 1)
+
+                /**
+                 * Dynamic Method
+                 */
+                api.removeForId(todo.id).then(() => { // notice AM using "=>" syntax
+                    this.$log.debug("Item removed:", todo);
+                    this.todos.splice(this.todos.indexOf(todo), 1)
+                }).catch((error) => {
+                    this.$log.debug(error);
+                    this.error = "Failed to remove todo"
+                });
             },
 
             editTodo: function(todo) {
@@ -195,8 +236,25 @@
                     return
                 }
 
-                this.editedTodo = null
-                todo.title = todo.title.trim()
+                /**
+                 * Static Method
+                 */
+                // this.editedTodo = null
+                // todo.title = todo.title.trim()
+
+                /**
+                 * Dynamic Method
+                 */
+                this.$log.info("Item updated:", todo);
+                api.updateForId(todo.id, todo.title.trim(), todo.completed).then((response) => {
+                    this.$log.info("Item updated:", response.data);
+                    this.editedTodo = null;
+                    todo.title = todo.title.trim();
+                }).catch((error) => {
+                    this.$log.debug(error);
+                    this.cancelEdit(todo);
+                    this.error = "Failed to update todo"
+                });
 
                 if (!todo.title) {
                     this.removeTodo(todo)
